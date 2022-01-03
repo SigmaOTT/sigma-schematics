@@ -74,8 +74,6 @@ function generate(options: ResourceOptions): Source {
       filter((path) => {
         if (path.endsWith('.dto.ts')) {
           return (
-            options.type !== 'graphql-code-first' &&
-            options.type !== 'graphql-schema-first' &&
             options.crud
           );
         }

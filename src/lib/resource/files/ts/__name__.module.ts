@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { <%= classify(name) %>Service } from './<%= name %>.service';
-<% if (type === 'rest' || type === 'microservice') { %>import { <%= classify(name) %>Controller } from './<%= name %>.controller';<% } %><% if (type === 'graphql-code-first' || type === 'graphql-schema-first') { %>import { <%= classify(name) %>Resolver } from './<%= name %>.resolver';<% } %><% if (type === 'ws') { %>import { <%= classify(name) %>Gateway } from './<%= name %>.gateway';<% } %>
+import { <%= singular(classify(name)) %>Service } from './<%= lowercased(name) %>.service';
+import { <%= singular(classify(name)) %>Controller } from './<%= lowercased(name) %>.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+import { <%= singular(classify(name)) %>, <%= singular(classify(name)) %>Schema } from './entities/<%= lowercased(name) %>.entity';
 
 @Module({
-  <% if (type === 'rest' || type === 'microservice') { %>controllers: [<%= classify(name) %>Controller],
-  providers: [<%= classify(name) %>Service]<% } else if (type === 'graphql-code-first' || type === 'graphql-schema-first') { %>providers: [<%= classify(name) %>Resolver, <%= classify(name) %>Service]<% } else { %>providers: [<%= classify(name) %>Gateway, <%= classify(name) %>Service]<% } %>
+  imports: [MongooseModule.forFeature([{ name: <%= singular(classify(name)) %>.name, schema: <%= singular(classify(name)) %>Schema }])],
+  controllers: [<%= singular(classify(name)) %>Controller],
+  providers: [<%= singular(classify(name)) %>Service],
 })
-export class <%= classify(name) %>Module {}
+export class <%= singular(classify(name)) %>Module {}

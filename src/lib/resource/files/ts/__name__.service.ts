@@ -1,28 +1,58 @@
-import { Injectable } from '@nestjs/common';<% if (crud && type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { CollectionDto, DocumentCollector } from '@sigmaott/paginate';
+import { Model } from 'mongoose';
 import { Create<%= singular(classify(name)) %>Dto } from './dto/create-<%= singular(name) %>.dto';
-import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= singular(name) %>.dto';<% } else if (crud) { %>
-import { Create<%= singular(classify(name)) %>Input } from './dto/create-<%= singular(name) %>.input';
-import { Update<%= singular(classify(name)) %>Input } from './dto/update-<%= singular(name) %>.input';<% } %>
+import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= singular(name) %>.dto';
+import {
+  <%= singular(classify(name)) %>,
+  <%= singular(classify(name)) %>Collection,
+  <%= singular(classify(name)) %>Document,
+} from './entities/<%= lowercased(name) %>.entity';
 
 @Injectable()
-export class <%= classify(name) %>Service {<% if (crud) { %>
-  create(<% if (type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto<% } else { %>create<%= singular(classify(name)) %>Input: Create<%= singular(classify(name)) %>Input<% } %>) {
-    return 'This action adds a new <%= lowercased(singular(classify(name))) %>';
+export class <%= singular(classify(name)) %>Service implements OnModuleInit {
+  private readonly logger = new Logger('<%= singular(classify(name)) %>Service');
+  private Collection<%= singular(classify(name)) %>
+
+  constructor(
+    @InjectModel(<%= singular(classify(name)) %>.name) private readonly <%= lowercased(name) %>Model: Model<<%= singular(classify(name)) %>>,
+  ) {}
+
+  onModuleInit() {
+    this.Collection<%= singular(classify(name)) %>= new DocumentCollector<<%= singular(classify(name)) %>Document>(
+      this.<%= lowercased(name) %>Model,
+    );
   }
 
-  findAll() {
-    return `This action returns all <%= lowercased(classify(name)) %>`;
+  async create(appId: string, create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto) {
+    create<%= singular(classify(name)) %>Dto.appId = appId;
+    return this.<%= lowercased(name) %>Model.create(create<%= singular(classify(name)) %>Dto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} <%= lowercased(singular(classify(name))) %>`;
+  async findAll(
+    appId: string,
+    collectionDto: CollectionDto,
+  ): Promise<<%= singular(classify(name)) %>Collection> {
+    collectionDto.filter.appId = appId;
+    return this.Collection<%= singular(classify(name)) %>.find(collectionDto);
   }
 
-  update(id: number, <% if (type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto<% } else { %>update<%= singular(classify(name)) %>Input: Update<%= singular(classify(name)) %>Input<% } %>) {
-    return `This action updates a #${id} <%= lowercased(singular(classify(name))) %>`;
+  async findOne(id: string): Promise<<%= singular(classify(name)) %>> {
+    return this.<%= lowercased(name) %>Model.findOne({ id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} <%= lowercased(singular(classify(name))) %>`;
+  async update(
+    appId: string,
+    id: string,
+    update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto,
+  ): Promise<<%= singular(classify(name)) %>> {
+    return this.<%= lowercased(name) %>Model.findOneAndUpdate({ id, appId }, update<%= singular(classify(name)) %>Dto, {
+      new: true,
+    });
   }
-<% } %>}
+
+  async remove(appId: string, id: string): Promise<<%= singular(classify(name)) %>> {
+    return this.<%= lowercased(name) %>Model.findOneAndRemove({ id, appId });
+  }
+}

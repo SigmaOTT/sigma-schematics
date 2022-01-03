@@ -1,7 +1,7 @@
 {
-  "name": "@nestjs/schematics",
-  "version": "8.0.5",
-  "description": "Nest - modern, fast, powerful node.js web framework (@schematics)",
+  "name": "@sigmaott/schematics",
+  "version": "1.1.0",
+  "description": "Sigma OTT platform resource service (@schematics)",
   "main": "dist/index.js",
   "files": [
     "dist/**/*"
@@ -30,15 +30,9 @@
     "url": "git+https://github.com/nestjs/schematics.git"
   },
   "contributors": [
-    "ThomRick",
-    "Kamil Mysliwiec",
-    "John Biundo"
+    "Viet Anh Luu"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nestjs/schematics/issues"
-  },
-  "homepage": "https://github.com/nestjs/schematics#readme",
   "dependencies": {
     "@angular-devkit/core": "13.1.1",
     "@angular-devkit/schematics": "13.1.1",

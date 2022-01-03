@@ -1,63 +1,69 @@
-<% if (crud && type === 'rest') { %>import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';<%
-} else if (crud && type === 'microservice') { %>import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';<%
-} else { %>import { Controller } from '@nestjs/common';<%
-} %>
-import { <%= classify(name) %>Service } from './<%= name %>.service';<% if (crud) { %>
-import { Create<%= singular(classify(name)) %>Dto } from './dto/create-<%= singular(name) %>.dto';
-import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= singular(name) %>.dto';<% } %>
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { NotFoundInterceptor } from '@sigmaott/common';
+import { AppId, AuditLogInterceptor } from '@sigmaott/core';
+import { CollectionDto, CollectionValidationPipe } from '@sigmaott/paginate';
+import { <%= singular(classify(name)) %>Service } from './<%= lowercased(name) %>.service';
+import { Create<%= singular(classify(name)) %>Dto } from './dto/create-<%= lowercased(name) %>.dto';
+import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= lowercased(name) %>.dto';
+import { <%= singular(classify(name)) %>, <%= singular(classify(name)) %>Collection } from './entities/<%= lowercased(name) %>.entity';
 
-<% if (type === 'rest') { %>@Controller('<%= dasherize(name) %>')<% } else { %>@Controller()<% } %>
-export class <%= classify(name) %>Controller {
-  constructor(private readonly <%= lowercased(name) %>Service: <%= classify(name) %>Service) {}<% if (type === 'rest' && crud) { %>
+@Controller('<%= singular(classify(name)) %>')
+export class <%= singular(classify(name)) %>Controller {
+  constructor(private readonly <%= lowercased(name) %>Service: <%= singular(classify(name)) %>Service) {}
 
   @Post()
-  create(@Body() create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto) {
-    return this.<%= lowercased(name) %>Service.create(create<%= singular(classify(name)) %>Dto);
+  @UseInterceptors(new AuditLogInterceptor('Create <%= singular(classify(name)) %>'))
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  create(@AppId() appId: string, @Body() create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto) {
+    return this.<%= lowercased(name) %>Service.create(appId, create<%= singular(classify(name)) %>Dto);
   }
 
   @Get()
-  findAll() {
-    return this.<%= lowercased(name) %>Service.findAll();
+  findAll(
+    @AppId() appId: string,
+    @Query(new CollectionValidationPipe(<%= singular(classify(name)) %>)) collectionDto: CollectionDto,
+  ): Promise<<%= singular(classify(name)) %>Collection> {
+    return this.<%= lowercased(name) %>Service.findAll(appId, collectionDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.<%= lowercased(name) %>Service.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto) {
-    return this.<%= lowercased(name) %>Service.update(+id, update<%= singular(classify(name)) %>Dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.<%= lowercased(name) %>Service.remove(+id);
-  }<% } else if (type === 'microservice' && crud) { %>
-
-  @MessagePattern('create<%= singular(classify(name)) %>')
-  create(@Payload() create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto) {
-    return this.<%= lowercased(name) %>Service.create(create<%= singular(classify(name)) %>Dto);
-  }
-
-  @MessagePattern('findAll<%= classify(name) %>')
-  findAll() {
-    return this.<%= lowercased(name) %>Service.findAll();
-  }
-
-  @MessagePattern('findOne<%= singular(classify(name)) %>')
-  findOne(@Payload() id: number) {
+  @UseInterceptors(new NotFoundInterceptor('[LRM] Không tìm thấy <%= lowercased(name) %>'))
+  findOne(@Param('id') id: string): Promise<<%= singular(classify(name)) %>> {
     return this.<%= lowercased(name) %>Service.findOne(id);
   }
 
-  @MessagePattern('update<%= singular(classify(name)) %>')
-  update(@Payload() update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto) {
-    return this.<%= lowercased(name) %>Service.update(update<%= singular(classify(name)) %>Dto.id, update<%= singular(classify(name)) %>Dto);
+  @Patch(':id')
+  @UseInterceptors(
+    new NotFoundInterceptor('[LRM] Không tìm thấy <%= lowercased(name) %>'),
+    new AuditLogInterceptor('Update <%= singular(classify(name)) %>'),
+  )
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  update(
+    @AppId() appId: string,
+    @Param('id') id: string,
+    @Body() update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto,
+  ) {
+    return this.<%= lowercased(name) %>Service.update(appId, id, update<%= singular(classify(name)) %>Dto);
   }
 
-  @MessagePattern('remove<%= singular(classify(name)) %>')
-  remove(@Payload() id: number) {
-    return this.<%= lowercased(name) %>Service.remove(id);
-  }<% } %>
+  @Delete(':id')
+  @UseInterceptors(
+    new NotFoundInterceptor('Không tìm thấy <%= lowercased(name) %>'),
+    new AuditLogInterceptor('Delete <%= singular(classify(name)) %>'),
+  )
+  remove(@AppId() appId: string, @Param('id') id: string) {
+    return this.<%= lowercased(name) %>Service.remove(appId, id);
+  }
 }
