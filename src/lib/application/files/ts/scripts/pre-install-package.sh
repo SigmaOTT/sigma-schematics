@@ -1,0 +1,1 @@
+pnpm install --save-dev @commitlint/cli @commitlint/config-conventional husky lint-staged

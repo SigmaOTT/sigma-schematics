@@ -1,0 +1,79 @@
+##################################
+#                                #
+#  Microservice Configuration    #
+#                                #
+##################################
+
+
+---
+# =================================================================
+# Server
+# =================================================================
+grpc:
+  port: 50051
+
+http:
+  port: 3002
+  host: 0.0.0.0
+  base_path: ''
+
+# =================================================================
+# Database Configuration
+# =================================================================
+mongo:
+  uri: mongodb://localhost:27017/ilp-campaign-service
+
+rabbitmq:
+  urls:
+    - amqp://localhost:5672
+  queue: events_processor
+
+redis:
+  host: localhost
+  port: 6379
+
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  db: postgres
+
+supabase:
+  url: http://127.0.0.1:8080
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZSIsCiAgICAiaWF0IjogMTY0NjY3MjQwMCwKICAgICJleHAiOiAxODA0NDM4ODAwCn0.pCRQGvwfBa_9wMHZ5fUbBupkyPc1xIEaW2Vl2m5fuDw
+
+minio:
+  endpoint: 172.16.20.89
+  port: 9000
+  access_key: minio
+  secret_key: minio123
+  bucket: thumbs
+
+kafka:
+  urls:
+    - localhost:29092
+  topic_event_interactive_result: EVENT_INTERACTIVE_TABLE
+  topic_campaign_user_result: CAMPAIGN_USER_RESULT_TABLE
+  topic_campaign_user: campaign_user_stream_test
+  group_id: test_group
+
+ksql:
+  host: localhost
+  port: 8088
+
+# =================================================================
+# Dependencies Services
+# =================================================================
+dependencies:
+  sigma_auth:
+    uri: localhost:50051
+    timeout: 5s
+
+
+
+# =================================================================
+# Service Configuration
+# =================================================================
+cat:
+  enable: true

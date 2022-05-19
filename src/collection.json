@@ -10,6 +10,16 @@
       "factory": "./lib/resource/resource.factory#main",
       "description": "Create a Nest resource.",
       "schema": "./lib/resource/schema.json"
+    },
+    "resource-mikro": {
+      "factory": "./lib/resource-mikro/resource.factory#main",
+      "description": "Create a Nest resource.",
+      "schema": "./lib/resource-mikro/schema.json"
+    },
+    "grpc-module": {
+      "factory": "./lib/grpc-module/grpc-module.factory#main",
+      "description": "Create a Nest grpc module.",
+      "schema": "./lib/grpc-module/schema.json"
     }
   }
 }

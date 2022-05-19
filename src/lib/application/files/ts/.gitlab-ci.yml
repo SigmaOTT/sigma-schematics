@@ -1,0 +1,115 @@
+image: registry.gviet.vn:5000/library/docker:stable
+
+variables:
+  REGISTRY_GROUP: sigma-livestream
+  HARBOR_IMAGE_TAG: $REGISTRY/$REGISTRY_GROUP/$CI_PROJECT_NAME
+  DEPLOY_IMAGE: $REGISTRY/$REGISTRY_GROUP/$CI_PROJECT_NAME
+  DEPLOY_PATH: interactive/ilp-campaign-service
+
+# cache:
+#   key: ${CI_COMMIT_REF_SLUG} # only apply for current branch
+#   paths:
+#     - node_modules/
+
+stages:
+  - test
+  - build
+  - docker-release
+  - deploy
+
+# # install npm dependencies so it'll be cache in subsequent jobs
+# # note: we can't do this in linting stage as in that stage, 2 jobs run concurrently and both need node_modules
+# install_dependencies:
+#   image: node:14.4-alpine
+#   stage: install
+#   tags:
+#     - dind
+#   script:
+#     - yarn
+
+lint-commit-msg:
+  image:
+    name: randondigital/commitlint
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+  stage: test
+  tags:
+    - dind
+  script:
+    - export
+    - yarn install --dev-dependencies
+    - echo "$CI_COMMIT_MESSAGE" | commitlint
+
+Test:
+  stage: test
+  image: node:14.16-alpine
+  tags:
+    - dind
+  services:
+    - mongo:latest
+  script:
+    - yarn
+    - yarn lint
+    - yarn test:ci
+  artifacts:
+    expire_in: 30 days
+    reports:
+      cobertura: coverage/cobertura-coverage.xml
+
+image build dev:
+  stage: build
+  tags:
+    - dind
+  script:
+    - chmod +x ./scripts/create-image.sh
+    - ./scripts/create-image.sh $HARBOR_IMAGE_TAG $CI_COMMIT_SHORT_SHA
+  only:
+    - develop
+
+release image dev to harbor:
+  stage: docker-release
+  tags:
+    - dind
+  before_script:
+    - docker login -u $HARBOR_USERNAME -p $HARBOR_PASSWORD $REGISTRY
+  script:
+    - chmod +x ./scripts/push-image.sh
+    - ./scripts/push-image.sh $HARBOR_IMAGE_TAG $CI_COMMIT_SHORT_SHA
+  only:
+    - develop
+
+image build prod:
+  stage: build
+  tags:
+    - dind
+  script:
+    - chmod +x ./scripts/create-image.sh
+    - ./scripts/create-image.sh $HARBOR_IMAGE_TAG $CI_COMMIT_TAG
+  rules:
+    # Runs only when a tag with 'X.Y.Z.DEVRELEASE.A' pattern is created
+    - if: '$CI_COMMIT_TAG =~ /^(?:\d+.){2}(?:\d+)$/'
+
+release image prod to harbor:
+  stage: docker-release
+  tags:
+    - dind
+  before_script:
+    - docker login -u $HARBOR_USERNAME -p $HARBOR_PASSWORD $REGISTRY
+  script:
+    - chmod +x ./scripts/push-image.sh
+    - ./scripts/push-image.sh $HARBOR_IMAGE_TAG $CI_COMMIT_TAG
+  rules:
+    # Runs only when a tag with 'X.Y.Z.DEVRELEASE.A' pattern is created
+    - if: '$CI_COMMIT_TAG =~ /^(?:\d+.){2}(?:\d+)$/'
+
+# deploy to dev:
+#   stage: deploy
+#   only:
+#     - develop
+#   variables:
+#     DEPLOY_ENVIRONMENT: develop
+#     DEPLOY_IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+#   trigger:
+#     project: sigma-livestream/k8s-infra-dev
+#     branch: master

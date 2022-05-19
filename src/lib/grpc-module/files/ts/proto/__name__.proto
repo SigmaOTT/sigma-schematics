@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package sigma.gviet.srv.<%= lowercased(name) %>;
+
+service <%= singular(classify(name)) %>Service {
+    rpc Get<%= singular(classify(name)) %> (Get<%= singular(classify(name)) %>Request) returns (Get<%= singular(classify(name)) %>Response) {}
+    rpc Delete<%= singular(classify(name)) %> (Delete<%= singular(classify(name)) %>Request) returns (Delete<%= singular(classify(name)) %>Response) {}
+    rpc Update<%= singular(classify(name)) %> (Update<%= singular(classify(name)) %>Request) returns (Update<%= singular(classify(name)) %>Response) {}
+    rpc Find<%= singular(classify(name)) %> (Find<%= singular(classify(name)) %>Request) returns (Find<%= singular(classify(name)) %>Response) {}
+};
+
+message <%= singular(classify(name)) %> {
+    string id = 1;
+    string name = 2;
+    optional string description = 3;
+    string createdAt = 4;
+    string updatedAt = 5;
+};
+
+message Find<%= singular(classify(name)) %>Request {
+    repeated string ids = 1;
+};
+
+message Find<%= singular(classify(name)) %>Response {
+    repeated <%= singular(classify(name)) %> channels = 1;
+}
+
+message Get<%= singular(classify(name)) %>Request {
+    string id = 1;
+}
+
+message Get<%= singular(classify(name)) %>Response {
+    <%= singular(classify(name)) %> channel = 1;
+}
+
+message Delete<%= singular(classify(name)) %>Request {
+    string id = 1;
+}
+
+message Delete<%= singular(classify(name)) %>Response {
+    <%= singular(classify(name)) %> channel = 1;
+}
+
+message Update<%= singular(classify(name)) %>Request {
+    optional string name = 1;
+}
+
+message Update<%= singular(classify(name)) %>Response {
+    <%= singular(classify(name)) %> channel = 1;
+}

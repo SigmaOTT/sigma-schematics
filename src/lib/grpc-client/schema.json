@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SchematicsNestGrpc",
+  "title": "Nest grpc service Options Schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the grpc service.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use for this grpc service (plural, e.g., \"users\")?"
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The path to create the grpc service."
+    },
+    "sourceRoot": {
+      "type": "string",
+      "description": "Nest resource grpc service root directory."
+    },
+    "language": {
+      "type": "string",
+      "description": "Application language (ts/js)."
+    },
+    "flat": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag to indicate if a directory is created."
+    },
+    "spec": {
+      "type": "boolean",
+      "default": true,
+      "description": "Specifies if specs file are generated."
+    },
+    "skipImport": {
+      "type": "boolean",
+      "description": "Flag to skip the module import.",
+      "default": false
+    }
+  },
+  "required": ["name"]
+}

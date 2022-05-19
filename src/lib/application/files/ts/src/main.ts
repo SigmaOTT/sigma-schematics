@@ -1,53 +1,52 @@
-import { INestApplication, Logger } from '@nestjs/common'
-import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe'
-import { NestFactory } from '@nestjs/core'
-import { DocumentBuilder } from '@nestjs/swagger/dist/document-builder'
-import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module'
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { AllExceptionsFilter, MongoExceptionFilter } from '@sigmaott/common';
+import * as bodyParser from 'body-parser';
+import * as config from 'config';
+import * as morgan from 'morgan';
+import { AppModule } from './module';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
-import * as config from 'config'
-import * as morgan from 'morgan'
-import { AppModule } from './app.module'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-bootstrap()
+bootstrap();
+
 async function bootstrap() {
-  const port: number = config.get('server.port')
-  const host: string = config.get('server.host')
+  const port: number = config.get('http.port');
   const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), { cors: true });
+
+  app.enableCors();
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+  app.setGlobalPrefix(config.get('http.base_path'));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalFilters(new MongoExceptionFilter());
-  app.setGlobalPrefix(config.get('server.base_path'))
-  app.disable('x-powered-by');
-  enableLogRequest(app)
-  enableSwagger(app)
-  enableValidationRequest(app)
-  await app.listen(port, host)
+  enableLogRequest(app);
+  enableSwagger(app);
+  enableValidationRequest(app);
+
+  await app.listen(port, '0.0.0.0');
+  await app.startAllMicroservices();
 }
 
 function enableLogRequest(app: INestApplication) {
-  const logger = new Logger('HTTPRequest')
   const format =
-    ':remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":response-time ms"'
+    ':remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":response-time ms"';
 
-  app.use(
-    morgan(format, {
-      stream: { write: s => logger.verbose(s) },
-      skip: req => req.url.includes('/health'),
-    }),
-  )
+  app.use(morgan(format));
 }
 
 function enableSwagger(app: INestApplication) {
   const options = new DocumentBuilder()
-    .setTitle('')
+    .setTitle('Interactive Livestream Campaign Service')
+    .setDescription('Interactive Livestream Campaign Service')
     .setVersion('1.0')
-    .build()
-  const document = SwaggerModule.createDocument(app, options)
-  const apiDocsPath = config.get('server.base_path') + '/api-docs'
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  const apiDocsPath = config.get('http.base_path') + '/api-docs';
 
-  SwaggerModule.setup(apiDocsPath, app, document)
+  SwaggerModule.setup(apiDocsPath, app, document);
 }
 
 function enableValidationRequest(app: INestApplication) {
-  app.useGlobalPipes(new ValidationPipe({ transform: true}))
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 }

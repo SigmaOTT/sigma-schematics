@@ -1,0 +1,45 @@
+##################################
+#                                #
+#  Microservice Configuration    #
+#                                #
+##################################
+
+
+# Mongo connect information
+mongo:
+  uri: mongodb://127.0.0.1:27017/test
+
+
+# Server config information
+http:
+  port: 8080
+  host: 0.0.0.0
+  base_path: /api/v1
+
+
+# GRPC server information
+grpc:
+  host: 0.0.0.0
+  port: 50051
+
+
+# Rabbitmq config
+rabbitmq:
+  uri: amqp://localhost:5672
+  exchange: job-update
+  routing_key: sig
+
+
+# redis config using config like ioredis
+redis:
+  host: 127.0.0.1
+  port: 6379
+
+
+# minio config
+minio:
+  endpoint: localhost
+  port: 9000
+  access_key: minioadmin
+  secret_key: minioadmin
+  region: us-east-1

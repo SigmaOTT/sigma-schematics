@@ -29,33 +29,33 @@
 ## Installation
 
 ```bash
-$ <%= packageManager %> install
+$ npm install
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ <%= packageManager %> run start
+$ npm run start
 
 # watch mode
-$ <%= packageManager %> run start:dev
+$ npm run start:dev
 
 # production mode
-$ <%= packageManager %> run start:prod
+$ npm run start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ <%= packageManager %> run test
+$ npm run test
 
 # e2e tests
-$ <%= packageManager %> run test:e2e
+$ npm run test:e2e
 
 # test coverage
-$ <%= packageManager %> run test:cov
+$ npm run test:cov
 ```
 
 ## Support
