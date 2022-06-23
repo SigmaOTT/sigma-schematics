@@ -18,12 +18,20 @@ import { <%= singular(classify(name)) %>Service } from './<%= lowercased(name) %
 import { Create<%= singular(classify(name)) %>Dto } from './dto/create-<%= lowercased(name) %>.dto';
 import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= lowercased(name) %>.dto';
 import { <%= singular(classify(name)) %>, <%= singular(classify(name)) %>Collection } from './entities/<%= lowercased(name) %>.entity';
+import { SanitizeMongooseModelInterceptor } from 'nestjs-mongoose-exclude';
+
 
 @Controller('<%= singular(classify(name)) %>')
+@ApiTags('<%= singular(classify(name)) %>')
+@UseInterceptors(new SanitizeMongooseModelInterceptor({ excludeMongooseId: true, excludeMongooseV: true }))
 export class <%= singular(classify(name)) %>Controller {
   constructor(private readonly <%= lowercased(name) %>Service: <%= singular(classify(name)) %>Service) {}
 
   @Post()
+  @ApiOperation({
+    description: `Create <%= singular(classify(name)) %>`,
+    summary: `Create <%= singular(classify(name)) %>`,
+  })
   @UseInterceptors(new AuditLogInterceptor('Create <%= singular(classify(name)) %>'))
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@AppId() appId: string, @Body() create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto) {
@@ -31,6 +39,10 @@ export class <%= singular(classify(name)) %>Controller {
   }
 
   @Get()
+  @ApiOperation({
+    description: `Get list <%= singular(classify(name)) %>`,
+    summary: `Get list <%= singular(classify(name)) %>`,
+  })
   findAll(
     @AppId() appId: string,
     @Query(new CollectionValidationPipe(<%= singular(classify(name)) %>)) collectionDto: CollectionDto,
@@ -39,12 +51,20 @@ export class <%= singular(classify(name)) %>Controller {
   }
 
   @Get(':id')
+  @ApiOperation({
+    description: `Get <%= singular(classify(name)) %> by Id`,
+    summary: `Get <%= singular(classify(name)) %> by Id`,
+  })
   @UseInterceptors(new NotFoundInterceptor('[LRM] Không tìm thấy <%= lowercased(name) %>'))
   findOne(@Param('id') id: string): Promise<<%= singular(classify(name)) %>> {
     return this.<%= lowercased(name) %>Service.findOne(id);
   }
 
   @Patch(':id')
+  @ApiOperation({
+    description: `Update <%= singular(classify(name)) %> by Id`,
+    summary: `Update <%= singular(classify(name)) %> by Id`,
+  })
   @UseInterceptors(
     new NotFoundInterceptor('[LRM] Không tìm thấy <%= lowercased(name) %>'),
     new AuditLogInterceptor('Update <%= singular(classify(name)) %>'),
@@ -59,6 +79,10 @@ export class <%= singular(classify(name)) %>Controller {
   }
 
   @Delete(':id')
+  @ApiOperation({
+    description: `Delete <%= singular(classify(name)) %> by Id`,
+    summary: `Delete <%= singular(classify(name)) %> by Id`,
+  })
   @UseInterceptors(
     new NotFoundInterceptor('Không tìm thấy <%= lowercased(name) %>'),
     new AuditLogInterceptor('Delete <%= singular(classify(name)) %>'),
