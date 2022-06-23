@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { NotFoundInterceptor } from '@sigmaott/common';
 import { AppId, AuditLogInterceptor } from '@sigmaott/core';
@@ -56,7 +57,7 @@ export class <%= singular(classify(name)) %>Controller {
     summary: `Get <%= singular(classify(name)) %> by Id`,
   })
   @UseInterceptors(new NotFoundInterceptor('[LRM] Không tìm thấy <%= lowercased(name) %>'))
-  findOne(@Param('id') id: string): Promise<<%= singular(classify(name)) %>> {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string): Promise<<%= singular(classify(name)) %>> {
     return this.<%= lowercased(name) %>Service.findOne(id);
   }
 
@@ -72,7 +73,7 @@ export class <%= singular(classify(name)) %>Controller {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   update(
     @AppId() appId: string,
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto,
   ) {
     return this.<%= lowercased(name) %>Service.update(appId, id, update<%= singular(classify(name)) %>Dto);
@@ -87,7 +88,7 @@ export class <%= singular(classify(name)) %>Controller {
     new NotFoundInterceptor('Không tìm thấy <%= lowercased(name) %>'),
     new AuditLogInterceptor('Delete <%= singular(classify(name)) %>'),
   )
-  remove(@AppId() appId: string, @Param('id') id: string) {
+  remove(@AppId() appId: string, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.<%= lowercased(name) %>Service.remove(appId, id);
   }
 }
