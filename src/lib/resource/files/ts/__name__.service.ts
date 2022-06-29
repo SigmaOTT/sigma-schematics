@@ -55,4 +55,14 @@ export class <%= singular(classify(name)) %>Service implements OnModuleInit {
   async remove(appId: string, id: string): Promise<<%= singular(classify(name)) %>> {
     return this.<%= lowercased(name) %>Model.findOneAndRemove({ id, appId });
   }
+
+  async getListTags(appId: string, searchStr: string): Promise<string[]> {
+    const filter: { appId?: string; tags?: any } = { appId };
+
+    if (searchStr) {
+      filter.tags = { $in: [new RegExp(searchStr)] };
+    }
+
+    return this.<%= lowercased(name) %>Model.distinct('tags', filter);
+  }
 }

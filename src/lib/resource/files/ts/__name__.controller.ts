@@ -91,4 +91,13 @@ export class <%= singular(classify(name)) %>Controller {
   remove(@AppId() appId: string, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.<%= lowercased(name) %>Service.remove(appId, id);
   }
+
+  @ApiOperation({
+    summary: 'Get list Tags using in  <%= singular(classify(name)) %>',
+    description: 'Get list Tags using in  <%= singular(classify(name)) %>',
+  })
+  @Get('actions/get-tags')
+  async getTags(@AppId() appId: string, @Query('search') searchStr: string): Promise<TagsDto> {
+    return { tags: await this.<%= lowercased(name) %>Service.getListTags(appId, searchStr) };
+  }
 }
