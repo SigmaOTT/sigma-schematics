@@ -1,6 +1,6 @@
 {
   "name": "@sigmaott/schematics",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Sigma OTT platform resource service (@schematics)",
   "main": "dist/index.js",
   "files": [
